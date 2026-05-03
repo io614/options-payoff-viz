@@ -1,0 +1,16 @@
+node_modules
+dist
+.DS_Store
+*.log
+.vite
+
+# auto-emitted by `tsc -b` on the composite vite config project
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo
+
+# playwright-cli scratch output (snapshots, console logs)
+.playwright-cli/
+
+# per-developer Claude Code settings
+.claude/settings.local.json
