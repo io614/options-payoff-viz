@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import { Leg } from '../lib/types';
 import { Breakeven, autoXRange, samplePayoff, summary } from '../lib/payoff';
-import { getLegColor } from '../lib/legColors';
+import { resolveLegColor } from '../lib/legColors';
 
 interface Props {
   legs: Leg[];
@@ -20,7 +20,16 @@ interface Props {
   showPerLeg: boolean;
   showCombined: boolean;
   hoveredLegId: string | null;
+  combinedColor: string;
 }
+
+// Convert "#rrggbb" to "rgba(r,g,b,a)" for the combined drop-shadow.
+const withAlpha = (hex: string, alpha: number) => {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+};
 
 const fmt = (v: number) => {
   const sign = v < 0 ? '−' : '';
@@ -42,6 +51,7 @@ export function PayoffChart({
   showPerLeg,
   showCombined,
   hoveredLegId,
+  combinedColor,
 }: Props) {
   const { data, summ, range } = useMemo(() => {
     const range = autoXRange(legs, spot);
@@ -189,14 +199,14 @@ export function PayoffChart({
                   const dimmed = hoveredLegId !== null && !isHovered;
                   // visible if: per-leg toggle on, or this is the actively hovered leg
                   if (!showPerLeg && !isHovered) return null;
-                  const color = getLegColor(i);
+                  const color = resolveLegColor(leg, i);
                   return (
                     <Line
                       key={leg.id}
                       type="linear"
                       dataKey={`leg${i}`}
                       stroke={color}
-                      strokeWidth={isHovered ? 2.25 : 1}
+                      strokeWidth={isHovered ? 3 : 1.5}
                       strokeOpacity={isHovered ? 1 : dimmed ? 0.18 : 0.55}
                       strokeDasharray={isHovered ? undefined : '3 3'}
                       dot={false}
@@ -214,15 +224,15 @@ export function PayoffChart({
                   <Line
                     type="linear"
                     dataKey="total"
-                    stroke="#ffae00"
-                    strokeWidth={2.25}
+                    stroke={combinedColor}
+                    strokeWidth={3}
                     strokeOpacity={hoveredLegId ? 0.35 : 1}
                     dot={false}
                     isAnimationActive={false}
                     style={{
                       filter: hoveredLegId
                         ? 'none'
-                        : 'drop-shadow(0 0 4px rgba(255,174,0,0.45))',
+                        : `drop-shadow(0 0 4px ${withAlpha(combinedColor, 0.45)})`,
                     }}
                   />
                 )}

@@ -1,6 +1,6 @@
 import { Leg } from '../lib/types';
 import { PRESET_NAMES, PRESETS, newEmptyLeg } from '../lib/presets';
-import { getLegColor } from '../lib/legColors';
+import { resolveLegColor } from '../lib/legColors';
 
 interface Props {
   legs: Leg[];
@@ -13,6 +13,8 @@ interface Props {
   onShowCombinedChange: (v: boolean) => void;
   hoveredLegId: string | null;
   onHoverLeg: (id: string | null) => void;
+  combinedColor: string;
+  onCombinedColorChange: (v: string) => void;
 }
 
 export function LegEditor({
@@ -26,6 +28,8 @@ export function LegEditor({
   onShowCombinedChange,
   hoveredLegId,
   onHoverLeg,
+  combinedColor,
+  onCombinedColorChange,
 }: Props) {
   const updateLeg = (id: string, patch: Partial<Leg>) => {
     onLegsChange(legs.map((l) => (l.id === id ? { ...l, ...patch } : l)));
@@ -66,11 +70,11 @@ export function LegEditor({
           </div>
           <div className="ml-auto flex items-center gap-3">
             <span className="label">Display</span>
-            <ToggleChip
+            <CombinedToggle
               checked={showCombined}
               onChange={onShowCombinedChange}
-              label="Combined"
-              swatch="var(--amber)"
+              color={combinedColor}
+              onColorChange={onCombinedColorChange}
             />
             <ToggleChip
               checked={showPerLeg}
@@ -149,7 +153,7 @@ export function LegEditor({
             )}
             {legs.map((leg, i) => {
               const isHovered = hoveredLegId === leg.id;
-              const color = getLegColor(i);
+              const color = resolveLegColor(leg, i);
               return (
               <tr
                 key={leg.id}
@@ -163,15 +167,28 @@ export function LegEditor({
               >
                 <td className="num w-7 px-2 py-2 text-[10px] text-[var(--text-dim)]">
                   <div className="flex items-center gap-1.5">
-                    <span
-                      aria-hidden
-                      className="inline-block h-1.5 w-1.5 rounded-full transition-transform"
-                      style={{
-                        background: color,
-                        transform: isHovered ? 'scale(1.6)' : 'scale(1)',
-                        boxShadow: isHovered ? `0 0 6px ${color}` : 'none',
-                      }}
-                    />
+                    <label
+                      className="relative inline-flex h-4 w-4 cursor-pointer items-center justify-center"
+                      title="Click to change color"
+                      aria-label={`Pick color for leg ${i + 1}`}
+                    >
+                      <span
+                        aria-hidden
+                        className="inline-block h-1.5 w-1.5 rounded-full transition-transform"
+                        style={{
+                          background: color,
+                          transform: isHovered ? 'scale(1.6)' : 'scale(1)',
+                          boxShadow: isHovered ? `0 0 6px ${color}` : 'none',
+                        }}
+                      />
+                      <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => updateLeg(leg.id, { color: e.target.value })}
+                        className="absolute inset-0 cursor-pointer opacity-0"
+                        aria-hidden
+                      />
+                    </label>
                     {String(i + 1).padStart(2, '0')}
                   </div>
                 </td>
@@ -253,6 +270,61 @@ export function LegEditor({
         </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+function CombinedToggle({
+  checked,
+  onChange,
+  color,
+  onColorChange,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  color: string;
+  onColorChange: (v: string) => void;
+}) {
+  return (
+    <div
+      className="flex items-stretch border transition-colors"
+      style={{
+        borderColor: checked ? 'var(--border)' : 'transparent',
+        background: checked ? '#0d0b09' : 'transparent',
+        opacity: checked ? 1 : 0.5,
+      }}
+    >
+      <label
+        className="relative flex cursor-pointer items-center px-2"
+        title="Click to change color"
+        aria-label="Pick combined line color"
+      >
+        <span
+          aria-hidden
+          className="inline-block h-[2px] w-4"
+          style={{ background: color }}
+        />
+        <input
+          type="color"
+          value={color}
+          onChange={(e) => onColorChange(e.target.value)}
+          className="absolute inset-0 cursor-pointer opacity-0"
+          aria-hidden
+        />
+      </label>
+      <button
+        type="button"
+        onClick={() => onChange(!checked)}
+        aria-pressed={checked}
+        className="px-2 py-1"
+      >
+        <span
+          className="label"
+          style={{ color: checked ? 'var(--text-mid)' : 'var(--text-dim)' }}
+        >
+          Combined
+        </span>
+      </button>
     </div>
   );
 }

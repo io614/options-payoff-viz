@@ -8,6 +8,7 @@ export interface Leg {
   strike: number;
   premium: number;
   qty: number;
+  color?: string;
 }
 
 export const CONTRACT_MULTIPLIER = 100;

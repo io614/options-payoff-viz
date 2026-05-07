@@ -3,6 +3,7 @@ import { LegEditor } from './components/LegEditor';
 import { PayoffChart } from './components/PayoffChart';
 import { Leg } from './lib/types';
 import { PRESETS } from './lib/presets';
+import { DEFAULT_COMBINED_COLOR } from './lib/legColors';
 
 export default function App() {
   const [spot, setSpot] = useState(100);
@@ -10,6 +11,7 @@ export default function App() {
   const [showPerLeg, setShowPerLeg] = useState(true);
   const [showCombined, setShowCombined] = useState(true);
   const [hoveredLegId, setHoveredLegId] = useState<string | null>(null);
+  const [combinedColor, setCombinedColor] = useState(DEFAULT_COMBINED_COLOR);
 
   return (
     <div className="relative z-10 mx-auto flex h-full max-w-[1400px] flex-col gap-6 px-6 py-6">
@@ -28,6 +30,8 @@ export default function App() {
             onShowCombinedChange={setShowCombined}
             hoveredLegId={hoveredLegId}
             onHoverLeg={setHoveredLegId}
+            combinedColor={combinedColor}
+            onCombinedColorChange={setCombinedColor}
           />
         </section>
         <section className="min-h-[480px]">
@@ -37,6 +41,7 @@ export default function App() {
             showPerLeg={showPerLeg}
             showCombined={showCombined}
             hoveredLegId={hoveredLegId}
+            combinedColor={combinedColor}
           />
         </section>
       </main>

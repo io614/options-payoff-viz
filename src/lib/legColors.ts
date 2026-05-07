@@ -1,5 +1,8 @@
+import { Leg } from './types';
+
 // Cool-toned palette intentionally avoiding yellow/amber/orange so the
 // amber combined line owns the warm end of the spectrum on its own.
+// These are *defaults* — a leg may override via `leg.color`.
 export const LEG_COLORS = [
   '#7dd3fc', // sky
   '#5eead4', // teal
@@ -11,4 +14,9 @@ export const LEG_COLORS = [
   '#fb7185', // rose
 ];
 
+export const DEFAULT_COMBINED_COLOR = '#ffae00';
+
 export const getLegColor = (i: number) => LEG_COLORS[i % LEG_COLORS.length];
+
+export const resolveLegColor = (leg: Leg, i: number) =>
+  leg.color ?? getLegColor(i);
